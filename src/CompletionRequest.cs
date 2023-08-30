@@ -4,15 +4,15 @@ namespace FunctionalGPT;
 
 internal record CompletionRequest
 {
-    public CompletionRequest(string model, IEnumerable<Message> messages)
+    internal CompletionRequest(string model, IEnumerable<Message> messages)
     {
         Model = model;
         Messages = messages;
     }
 
     [JsonPropertyName("model")]
-    public string Model { get; set; }
+    internal string Model { get; set; }
 
     [JsonPropertyName("messages")]
-    public IEnumerable<Message> Messages { get; set; }
+    internal IEnumerable<Message> Messages { get; set; }
 }
