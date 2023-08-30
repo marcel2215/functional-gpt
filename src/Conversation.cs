@@ -2,6 +2,13 @@
 
 public record Conversation
 {
+    public Conversation() { }
+
+    public Conversation(string systemMessage)
+    {
+        FromSystem(systemMessage);
+    }
+
     public List<Message> Messages { get; set; } = new();
 
     public void FromSystem(string message)
