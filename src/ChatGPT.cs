@@ -37,4 +37,20 @@ public class ChatGPT
         conversation.FromAssistant(messageContent);
         return messageContent;
     }
+
+    public async Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default)
+    {
+        var conversation = new Conversation();
+        conversation.FromUser(prompt);
+
+        return await CompleteAsync(conversation, cancellationToken);
+    }
+
+    public async Task<string> CompleteAsync(string systemMessage, string prompt, CancellationToken cancellationToken = default)
+    {
+        var conversation = new Conversation(systemMessage);
+        conversation.FromUser(prompt);
+
+        return await CompleteAsync(conversation, cancellationToken);
+    }
 }
