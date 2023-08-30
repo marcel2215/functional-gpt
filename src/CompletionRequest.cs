@@ -2,7 +2,7 @@
 
 internal record CompletionRequest
 {
-    public CompletionRequest(string model, string messages)
+    public CompletionRequest(string model, IEnumerable<Message> messages)
     {
         Model = model;
         Messages = messages;
@@ -10,5 +10,5 @@ internal record CompletionRequest
 
     public string Model { get; set; }
 
-    public string Messages { get; set; }
+    public IEnumerable<Message> Messages { get; set; }
 }
