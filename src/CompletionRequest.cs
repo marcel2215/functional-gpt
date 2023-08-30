@@ -1,4 +1,6 @@
-﻿namespace FunctionalGPT;
+﻿using System.Text.Json.Serialization;
+
+namespace FunctionalGPT;
 
 internal record CompletionRequest
 {
@@ -8,7 +10,9 @@ internal record CompletionRequest
         Messages = messages;
     }
 
+    [JsonPropertyName("model")]
     public string Model { get; set; }
 
+    [JsonPropertyName("messages")]
     public IEnumerable<Message> Messages { get; set; }
 }

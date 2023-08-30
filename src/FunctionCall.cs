@@ -1,4 +1,6 @@
-﻿namespace FunctionalGPT;
+﻿using System.Text.Json.Serialization;
+
+namespace FunctionalGPT;
 
 public record FunctionCall
 {
@@ -8,7 +10,9 @@ public record FunctionCall
         Arguments = arguments;
     }
 
+    [JsonPropertyName("name")]
     public string Name { get; set; }
 
+    [JsonPropertyName("arguments")]
     public string Arguments { get; set; }
 }

@@ -1,4 +1,6 @@
-﻿namespace FunctionalGPT;
+﻿using System.Text.Json.Serialization;
+
+namespace FunctionalGPT;
 
 public record Message
 {
@@ -21,12 +23,18 @@ public record Message
         FunctionCall = functionCall;
     }
 
+    [JsonPropertyName("role")]
     public Role Role { get; set; }
 
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Name { get; set; }
 
+    [JsonPropertyName("content")]
     public string? Content { get; set; }
 
+    [JsonPropertyName("function_call")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public FunctionCall? FunctionCall { get; set; }
 
     public static Message FromSystem(string content)
