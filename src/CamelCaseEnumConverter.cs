@@ -5,5 +5,5 @@ namespace FunctionalGPT;
 
 internal class CamelCaseEnumConverter : JsonStringEnumConverter
 {
-    internal CamelCaseEnumConverter() : base(JsonNamingPolicy.CamelCase) { }
+    public CamelCaseEnumConverter() : base(JsonNamingPolicy.CamelCase) { }
 }
