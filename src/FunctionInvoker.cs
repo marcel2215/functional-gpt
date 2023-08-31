@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace FunctionalGPT;
 
@@ -12,7 +12,19 @@ internal static class FunctionInvoker
         foreach (var argument in argumentsDocument.RootElement.EnumerateObject())
         {
             var simplifiedName = argument.Name.Replace("_", "").ToLowerInvariant();
-            argumentDictionary.Add(simplifiedName, argument.Value.GetRawText());
+            var value = argument.Value.GetRawText();
+
+            if (value.StartsWith("\""))
+            {
+                value = value[1..];
+            }
+
+            if (value.EndsWith("\""))
+            {
+                value = value[..^1];
+            }
+
+            argumentDictionary.Add(simplifiedName, value);
         }
 
         var argumentList = new List<object>();
