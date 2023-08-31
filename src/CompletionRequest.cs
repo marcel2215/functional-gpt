@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace FunctionalGPT;
 
@@ -15,4 +16,8 @@ internal record CompletionRequest
 
     [JsonPropertyName("messages")]
     public IEnumerable<Message> Messages { get; set; }
+
+    [JsonPropertyName("functions")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public JsonArray? Functions { get; set; }
 }
