@@ -27,4 +27,18 @@ internal static class StringCaseConverter
 
         return result.ToString();
     }
+
+    internal static string ToPascalCase(this string value)
+    {
+        var parts = value.Split('_');
+        for (var i = 0; i < parts.Length; i++)
+        {
+            if (!string.IsNullOrEmpty(parts[i]))
+            {
+                parts[i] = char.ToUpper(parts[i][0]) + parts[i][1..].ToLower();
+            }
+        }
+
+        return string.Join("", parts);
+    }
 }
