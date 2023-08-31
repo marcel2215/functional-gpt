@@ -72,39 +72,8 @@ internal static class FunctionSerializer
     {
         var propertyObject = new JsonObject
         {
-            { "type",  parameter.ParameterType.ToJsonType(out var format, out var minValue, out var maxValue) }
+            { "type",  parameter.ParameterType.ToJsonType() }
         };
-
-        if (IsEmailAddress(parameter))
-        {
-            propertyObject.Add("format", "email");
-        }
-        else if (format != null)
-        {
-            propertyObject.Add("format", format);
-        }
-
-        if (minValue != null)
-        {
-            propertyObject.Add("minimum", minValue);
-        }
-
-        if (maxValue != null)
-        {
-            propertyObject.Add("maximum", maxValue);
-        }
-
-        var (minLength, maxLength) = GetLengthConstraints(parameter);
-
-        if (minLength != null)
-        {
-            propertyObject.Add("minLength", minLength);
-        }
-
-        if (maxLength != null)
-        {
-            propertyObject.Add("maxLength", maxLength);
-        }
 
         if (parameter.ParameterType.IsEnum)
         {
@@ -137,31 +106,6 @@ internal static class FunctionSerializer
         return attribute != null;
     }
 
-    private static bool IsEmailAddress(ParameterInfo parameter)
-    {
-        var attribute = parameter.GetCustomAttribute<EmailAddressAttribute>();
-        return attribute != null;
-    }
-
-    private static (int? Min, int? Max) GetLengthConstraints(ParameterInfo parameter)
-    {
-        int? min = null, max = null;
-
-        var minLengthAttribute = parameter.GetCustomAttribute<MinLengthAttribute>();
-        if (minLengthAttribute != null)
-        {
-            min = minLengthAttribute.Length;
-        }
-
-        var maxLengthAttribute = parameter.GetCustomAttribute<MaxLengthAttribute>();
-        if (maxLengthAttribute != null)
-        {
-            max = maxLengthAttribute.Length;
-        }
-
-        return (min, max);
-    }
-
     private static string? GetDescription(MemberInfo member)
     {
         var attribute = member.GetCustomAttribute<DescriptionAttribute>();
@@ -174,46 +118,20 @@ internal static class FunctionSerializer
         return attribute?.Description;
     }
 
-    private static string ToJsonType(this Type type, out string? format, out long? min, out long? max)
+    private static string ToJsonType(this Type type)
     {
-        format = null;
-        min = null;
-        max = null;
-
         if (type == typeof(bool))
         {
             return "boolean";
         }
 
-        if (type == typeof(byte))
+        if (type == typeof(byte) || type == typeof(sbyte))
         {
-            min = byte.MinValue;
-            max = byte.MaxValue;
-
             return "integer";
         }
 
-        if (type == typeof(sbyte))
+        if (type == typeof(short) || type == typeof(ushort))
         {
-            min = sbyte.MinValue;
-            max = sbyte.MaxValue;
-
-            return "integer";
-        }
-
-        if (type == typeof(short))
-        {
-            min = short.MinValue;
-            max = short.MaxValue;
-
-            return "integer";
-        }
-
-        if (type == typeof(ushort))
-        {
-            min = ushort.MinValue;
-            max = ushort.MaxValue;
-
             return "integer";
         }
 
@@ -224,7 +142,6 @@ internal static class FunctionSerializer
 
         if (type == typeof(uint) || type == typeof(ulong))
         {
-            min = 0;
             return "integer";
         }
 
@@ -233,52 +150,28 @@ internal static class FunctionSerializer
             return "number";
         }
 
-        if (type == typeof(char))
-        {
-            min = 1;
-            max = 1;
-
-            return "string";
-        }
-
-        if (type == typeof(string) || type.IsEnum)
+        if (type == typeof(char) || type == typeof(string))
         {
             return "string";
         }
 
         if (type == typeof(Guid))
         {
-            format = "uuid";
             return "string";
         }
 
-        if (type == typeof(DateTime))
+        if (type == typeof(DateTime) || type == typeof(DateOnly) || type == typeof(TimeOnly) || type == typeof(TimeSpan))
         {
-            format = "date-time";
-            return "string";
-        }
-
-        if (type == typeof(DateOnly))
-        {
-            format = "date";
-            return "string";
-        }
-
-        if (type == typeof(TimeOnly))
-        {
-            format = "time";
-            return "string";
-        }
-
-        if (type == typeof(TimeSpan))
-        {
-            format = "duration";
             return "string";
         }
 
         if (type == typeof(Uri))
         {
-            format = "uri";
+            return "string";
+        }
+
+        if (type.IsEnum)
+        {
             return "string";
         }
 
