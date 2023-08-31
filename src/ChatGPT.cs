@@ -27,17 +27,33 @@ public class ChatGPT
     public async Task<string> CompleteAsync(Conversation conversation, CancellationToken cancellationToken = default)
     {
         var request = new CompletionRequest(Model, conversation.Messages);
-        var response = await _httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", request, cancellationToken);
+        if (Functions.Any())
+        {
+            request.Functions = FunctionSerializer.Serialize(Functions);
+        }
 
+        var response = await _httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", request, cancellationToken);
         _ = response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var document = await JsonDocument.ParseAsync(responseContent, default, cancellationToken);
-        var message = document.RootElement.GetProperty("choices")[0].GetProperty("message");
-        var messageContent = message.GetProperty("content").GetString()!;
+        var responseDocument = await JsonDocument.ParseAsync(responseContent, default, cancellationToken);
+        var messageElement = responseDocument.RootElement.GetProperty("choices")[0].GetProperty("message");
+        var message = JsonSerializer.Deserialize<Message>(messageElement)!;
 
-        conversation.FromAssistant(messageContent);
-        return messageContent;
+        if (message.FunctionCall != null)
+        {
+            conversation.FromAssistant(message.FunctionCall);
+
+            var simplifiedName = message.FunctionCall.Name.Replace("_", "");
+            var function = Functions.First(f => f.Method.Name.Equals(simplifiedName, StringComparison.InvariantCultureIgnoreCase));
+            var functionResult = await FunctionInvoker.InvokeForResultAsync(function, message.FunctionCall.Arguments, cancellationToken);
+
+            conversation.FromFunction(message.FunctionCall.Name, functionResult);
+            return await CompleteAsync(conversation, cancellationToken);
+        }
+
+        conversation.FromAssistant(message.Content!);
+        return message.Content!;
     }
 
     public async Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default)
