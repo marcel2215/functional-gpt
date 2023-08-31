@@ -4,6 +4,8 @@ namespace FunctionalGPT;
 
 public record Message
 {
+    public Message() { }
+
     public Message(Role role, string content)
     {
         Role = role;
