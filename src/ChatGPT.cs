@@ -22,6 +22,8 @@ public class ChatGPT
 
     public string Model { get; set; }
 
+    public List<Delegate> Functions { get; set; } = new();
+
     public async Task<string> CompleteAsync(Conversation conversation, CancellationToken cancellationToken = default)
     {
         var request = new CompletionRequest(Model, conversation.Messages);
