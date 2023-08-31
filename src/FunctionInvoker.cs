@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace FunctionalGPT;
 
@@ -39,8 +39,20 @@ internal static class FunctionInvoker
             var simplifiedName = parameter.Name!.ToLowerInvariant();
             if (argumentDictionary.TryGetValue(simplifiedName, out var argument))
             {
-                var value = Convert.ChangeType(argument, parameter.ParameterType);
-                argumentList.Add(value);
+                if (parameter.ParameterType.IsEnum)
+                {
+                    if (!Enum.TryParse(parameter.ParameterType, argument.ToPascalCase(), out var value))
+                    {
+                        return $"{{\"is_success\": false, \"error\": \"invalid enum value\", \"parameter\": \"{parameter.Name.ToPascalCase()}\"}}";
+                    }
+
+                    argumentList.Add(value);
+                }
+                else
+                {
+                    var value = Convert.ChangeType(argument, parameter.ParameterType);
+                    argumentList.Add(value);
+                }
             }
             else if (parameter.IsOptional && parameter.DefaultValue != null)
             {
