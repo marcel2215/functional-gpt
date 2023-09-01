@@ -50,8 +50,15 @@ internal static class FunctionInvoker
                 }
                 else
                 {
-                    var value = Convert.ChangeType(argument, parameter.ParameterType);
-                    argumentList.Add(value);
+                    try
+                    {
+                        var value = Convert.ChangeType(argument, parameter.ParameterType);
+                        argumentList.Add(value);
+                    }
+                    catch
+                    {
+                        return $"{{\"is_success\": false, \"error\": \"argument does not match parameter type\", \"parameter\": \"{parameter.Name.ToPascalCase()}\", \"type\":\"{parameter.ParameterType}\"}}";
+                    }
                 }
             }
             else if (parameter.IsOptional && parameter.DefaultValue != null)
