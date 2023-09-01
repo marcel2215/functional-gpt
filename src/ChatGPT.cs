@@ -71,4 +71,19 @@ public class ChatGPT
 
         return await CompleteAsync(conversation, cancellationToken);
     }
+
+    public void AddFunction(Delegate function)
+    {
+        Functions.Add(function);
+    }
+
+    public bool RemoveFunction(Delegate function)
+    {
+        return Functions.Remove(function);
+    }
+
+    public void ClearFunctions()
+    {
+        Functions.Clear();
+    }
 }
