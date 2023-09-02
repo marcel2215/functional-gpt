@@ -71,41 +71,10 @@ internal static class FunctionSerializer
 
     private static JsonObject SerializeParameter(ParameterInfo parameter)
     {
-        var propertyObject = new JsonObject
-        {
-            { "type",  parameter.ParameterType.ToJsonType() }
-        };
-
-        if (parameter.ParameterType.IsEnum)
-        {
-            var membersArray = new JsonArray();
-            foreach (var enumMember in Enum.GetNames(parameter.ParameterType))
-            {
-                membersArray.Add(enumMember.ToSnakeCase());
-            }
-
-            propertyObject.Add("enum", membersArray);
-        }
-        else if (parameter.ParameterType.IsArray && parameter.ParameterType.HasElementType)
-        {
-            var itemsObject = new JsonObject
-            {
-                { "type", parameter.ParameterType.GetElementType()!.ToJsonType() }
-            };
-
-            propertyObject.Add("items", itemsObject);
-        }
-        else if (typeof(IEnumerable).IsAssignableFrom(parameter.ParameterType) && parameter.ParameterType.GenericTypeArguments.Length == 1)
-        {
-            var itemsObject = new JsonObject
-            {
-                { "type", parameter.ParameterType.GenericTypeArguments[0].ToJsonType() }
-            };
-
-            propertyObject.Add("items", itemsObject);
-        }
-
+        var parameterType = parameter.ParameterType;
+        var propertyObject = SerializeProperty(parameterType);
         var description = GetDescription(parameter);
+
         if (!string.IsNullOrEmpty(description))
         {
             propertyObject.Add("description", description);
@@ -114,6 +83,41 @@ internal static class FunctionSerializer
         if (parameter.IsOptional && parameter.DefaultValue != null)
         {
             propertyObject.Add("default", parameter.DefaultValue.ToString());
+        }
+
+        return propertyObject;
+    }
+
+    private static JsonObject SerializeProperty(Type propertyTyep)
+    {
+        var propertyObject = new JsonObject
+        {
+            { "type", propertyTyep.ToJsonType() }
+        };
+
+        if (propertyTyep.IsEnum)
+        {
+            var membersArray = new JsonArray();
+            foreach (var enumMember in Enum.GetNames(propertyTyep))
+            {
+                membersArray.Add(enumMember.ToSnakeCase());
+            }
+
+            propertyObject.Add("enum", membersArray);
+        }
+        else if (propertyTyep.IsArray && propertyTyep.HasElementType)
+        {
+            var itemsObject = new JsonObject
+            {
+                { "type", propertyTyep.GetElementType()!.ToJsonType() }
+            };
+
+            propertyObject.Add("items", itemsObject);
+        }
+        else if (typeof(IEnumerable).IsAssignableFrom(propertyTyep) && propertyTyep.GenericTypeArguments.Length == 1)
+        {
+            var itemType = propertyTyep.GenericTypeArguments[0];
+            propertyObject.Add("items", SerializeProperty(itemType));
         }
 
         return propertyObject;
