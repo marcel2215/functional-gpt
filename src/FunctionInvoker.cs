@@ -52,7 +52,9 @@ internal static class FunctionInvoker
                 {
                     try
                     {
-                        var value = Convert.ChangeType(argument, parameter.ParameterType);
+                        var value = JsonSerializer.Deserialize(argument, parameter.ParameterType)
+                            ?? throw new InvalidOperationException("Failed to deserialize the parameter.");
+
                         argumentList.Add(value);
                     }
                     catch

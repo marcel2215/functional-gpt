@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Nodes;
@@ -84,6 +85,24 @@ internal static class FunctionSerializer
             }
 
             propertyObject.Add("enum", membersArray);
+        }
+        else if (parameter.ParameterType.IsArray && parameter.ParameterType.HasElementType)
+        {
+            var itemsObject = new JsonObject
+            {
+                { "type", parameter.ParameterType.GetElementType()!.ToJsonType() }
+            };
+
+            propertyObject.Add("items", itemsObject);
+        }
+        else if (typeof(IEnumerable).IsAssignableFrom(parameter.ParameterType) && parameter.ParameterType.GenericTypeArguments.Length == 1)
+        {
+            var itemsObject = new JsonObject
+            {
+                { "type", parameter.ParameterType.GenericTypeArguments[0].ToJsonType() }
+            };
+
+            propertyObject.Add("items", itemsObject);
         }
 
         var description = GetDescription(parameter);
@@ -173,6 +192,16 @@ internal static class FunctionSerializer
         if (type.IsEnum)
         {
             return "string";
+        }
+
+        if (type.IsArray && type.HasElementType)
+        {
+            return "array";
+        }
+
+        if (typeof(IEnumerable).IsAssignableFrom(type) && type.GenericTypeArguments.Length == 1)
+        {
+            return "array";
         }
 
         throw new NotSupportedException($"The parameter type '{type.Name}' is currently not supported.");
