@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using FunctionalGPT.Properties;
+using System.Text.Json;
 
 namespace FunctionalGPT;
 
@@ -54,10 +55,10 @@ internal static class FunctionInvoker
                     {
                         var options = new JsonSerializerOptions
                         {
-                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
                             Converters =
                             {
-                                new CamelCaseEnumConverter()
+                                new SnakeCaseEnumConverter()
                             }
                         };
 

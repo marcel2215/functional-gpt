@@ -2,7 +2,7 @@
 
 namespace FunctionalGPT;
 
-[JsonConverter(typeof(CamelCaseEnumConverter))]
+[JsonConverter(typeof(SnakeCaseEnumConverter))]
 public enum Role
 {
     System,
