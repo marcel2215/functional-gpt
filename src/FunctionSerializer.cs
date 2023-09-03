@@ -115,6 +115,20 @@ internal static class FunctionSerializer
             var itemType = propertyType.GenericTypeArguments[0];
             propertyObject.Add("items", SerializeProperty(itemType));
         }
+        else if (propertyType.IsClass)
+        {
+            var properties = propertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.CanWrite);
+            if (properties.Any())
+            {
+                var propertiesObject = new JsonObject();
+                foreach (var property in properties)
+                {
+                    propertiesObject.Add(property.Name.ToSnakeCase(), SerializeProperty(property.PropertyType));
+                }
+
+                propertyObject.Add("properties", propertiesObject);
+            }
+        }
 
         return propertyObject;
     }
@@ -202,6 +216,11 @@ internal static class FunctionSerializer
         if (typeof(IEnumerable).IsAssignableFrom(type) && type.GenericTypeArguments.Length == 1)
         {
             return "array";
+        }
+
+        if (type.IsClass)
+        {
+            return "object";
         }
 
         throw new NotSupportedException($"The parameter type '{type.Name}' is currently not supported.");
