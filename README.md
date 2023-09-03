@@ -50,7 +50,7 @@ Console.WriteLine(response);
 > Top-level and anonymous functions are currently not supported.
 
 > [!WARNING]
-> All parameters must be primitive types. Strings and enums are allowed.
+> All parameters must be primitive types. Enums, arrays, and collections are allowed.
 
 ```cs
 using FunctionalGPT;
