@@ -52,12 +52,23 @@ internal static class FunctionInvoker
                 {
                     try
                     {
-                        var value = Convert.ChangeType(argument, parameter.ParameterType);
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            Converters =
+                            {
+                                new CamelCaseEnumConverter()
+                            }
+                        };
+
+                        var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options)
+                            ?? throw new InvalidOperationException("Failed to deserialize the parameter.");
+
                         argumentList.Add(value);
                     }
                     catch
                     {
-                        return $"{{\"is_success\": false, \"error\": \"argument does not match parameter type\", \"parameter\": \"{parameter.Name.ToPascalCase()}\", \"type\":\"{parameter.ParameterType}\"}}";
+                        return $"{{\"is_success\": false, \"error\": \"Argument does not match parameter type. If the argument is an enum - pass it as camelCase (first lower).\", \"parameter\": \"{parameter.Name.ToPascalCase()}\", \"type\":\"{parameter.ParameterType}\"}}";
                     }
                 }
             }

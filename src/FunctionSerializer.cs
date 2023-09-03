@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Nodes;
@@ -70,23 +71,10 @@ internal static class FunctionSerializer
 
     private static JsonObject SerializeParameter(ParameterInfo parameter)
     {
-        var propertyObject = new JsonObject
-        {
-            { "type",  parameter.ParameterType.ToJsonType() }
-        };
-
-        if (parameter.ParameterType.IsEnum)
-        {
-            var membersArray = new JsonArray();
-            foreach (var enumMember in Enum.GetNames(parameter.ParameterType))
-            {
-                membersArray.Add(enumMember.ToSnakeCase());
-            }
-
-            propertyObject.Add("enum", membersArray);
-        }
-
+        var parameterType = parameter.ParameterType;
+        var propertyObject = SerializeProperty(parameterType);
         var description = GetDescription(parameter);
+
         if (!string.IsNullOrEmpty(description))
         {
             propertyObject.Add("description", description);
@@ -95,6 +83,37 @@ internal static class FunctionSerializer
         if (parameter.IsOptional && parameter.DefaultValue != null)
         {
             propertyObject.Add("default", parameter.DefaultValue.ToString());
+        }
+
+        return propertyObject;
+    }
+
+    private static JsonObject SerializeProperty(Type propertyType)
+    {
+        var propertyObject = new JsonObject
+        {
+            { "type", propertyType.ToJsonType() }
+        };
+
+        if (propertyType.IsEnum)
+        {
+            var membersArray = new JsonArray();
+            foreach (var enumMember in Enum.GetNames(propertyType))
+            {
+                membersArray.Add(enumMember.ToSnakeCase());
+            }
+
+            propertyObject.Add("enum", membersArray);
+        }
+        else if (propertyType.IsArray && propertyType.HasElementType)
+        {
+            var itemType = propertyType.GetElementType()!;
+            propertyObject.Add("items", SerializeProperty(itemType));
+        }
+        else if (typeof(IEnumerable).IsAssignableFrom(propertyType) && propertyType.GenericTypeArguments.Length == 1)
+        {
+            var itemType = propertyType.GenericTypeArguments[0];
+            propertyObject.Add("items", SerializeProperty(itemType));
         }
 
         return propertyObject;
@@ -173,6 +192,16 @@ internal static class FunctionSerializer
         if (type.IsEnum)
         {
             return "string";
+        }
+
+        if (type.IsArray && type.HasElementType)
+        {
+            return "array";
+        }
+
+        if (typeof(IEnumerable).IsAssignableFrom(type) && type.GenericTypeArguments.Length == 1)
+        {
+            return "array";
         }
 
         throw new NotSupportedException($"The parameter type '{type.Name}' is currently not supported.");
