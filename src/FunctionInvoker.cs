@@ -35,10 +35,7 @@ internal static class FunctionInvoker
                     var options = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
-                        Converters =
-                            {
-                                new SnakeCaseEnumConverter()
-                            }
+                        Converters = { new SnakeCaseEnumConverter() }
                     };
 
                     var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options);
