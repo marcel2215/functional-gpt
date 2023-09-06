@@ -1,4 +1,4 @@
-using FunctionalGPT.Properties;
+﻿using FunctionalGPT.Properties;
 using System.Text.Json;
 
 namespace FunctionalGPT;
@@ -67,7 +67,7 @@ internal static class FunctionInvoker
                     }
                     catch
                     {
-                        return $"{{\"is_success\": false, \"error\": \"Argument does not match parameter type. If the argument is an enum - pass it as camelCase (first lower).\", \"parameter\": \"{parameter.Name.ToPascalCase()}\", \"type\":\"{parameter.ParameterType}\"}}";
+                        return $"{{\"is_success\":false,\"error\":\"Argument does not match parameter type.\",\"parameter\":\"{parameter.Name.ToPascalCase()}\",\"type\":\"{parameter.ParameterType}\"}}";
                     }
                 }
             }
@@ -77,7 +77,7 @@ internal static class FunctionInvoker
             }
             else
             {
-                return $"{{\"is_success\": false, \"error\": \"value missing for required parameter\", \"parameter\": \"{parameter.Name.ToSnakeCase()}\"}}";
+                return $"{{\"is_success\":false,\"error\":\"Value is missing for required parameter.\",\"parameter\":\"{parameter.Name.ToSnakeCase()}\"}}";
             }
         }
 
