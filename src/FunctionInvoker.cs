@@ -7,39 +7,39 @@ internal static class FunctionInvoker
 {
     internal static async Task<string> InvokeAsync(Delegate function, string arguments, CancellationToken cancellationToken = default)
     {
-        var argumentsDocument = JsonDocument.Parse(arguments);
-        var argumentDictionary = new Dictionary<string, string>();
+        var modelArguments = JsonDocument.Parse(arguments);
+        var rawArguments = new Dictionary<string, string>();
 
-        foreach (var argument in argumentsDocument.RootElement.EnumerateObject())
+        foreach (var rawArgument in modelArguments.RootElement.EnumerateObject())
         {
-            var simplifiedName = argument.Name.Replace("_", "").ToLowerInvariant();
-            var value = argument.Value.GetRawText();
+            var simplifiedArgumentName = rawArgument.Name.Replace("_", "").ToLowerInvariant();
+            var rawArgumentValue = rawArgument.Value.GetRawText();
 
-            argumentDictionary.Add(simplifiedName, value);
+            rawArguments.Add(simplifiedArgumentName, rawArgumentValue);
         }
 
-        var argumentList = new List<object?>();
+        var deserializedArguments = new List<object?>();
         foreach (var parameter in function.Method.GetParameters())
         {
             if (parameter.ParameterType == typeof(CancellationToken))
             {
-                argumentList.Add(cancellationToken);
+                deserializedArguments.Add(cancellationToken);
                 continue;
             }
 
-            var simplifiedName = parameter.Name!.ToLowerInvariant();
-            if (argumentDictionary.TryGetValue(simplifiedName, out var argument))
+            var simplifiedParameterName = parameter.Name!.ToLowerInvariant();
+            if (rawArguments.TryGetValue(simplifiedParameterName, out var rawArgumentValue))
             {
                 try
                 {
-                    var options = new JsonSerializerOptions
+                    var jsonOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
                         Converters = { new SnakeCaseEnumConverter() }
                     };
 
-                    var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options);
-                    argumentList.Add(value);
+                    var argumentValue = JsonSerializer.Deserialize(rawArgumentValue, parameter.ParameterType, jsonOptions);
+                    deserializedArguments.Add(argumentValue);
                 }
                 catch
                 {
@@ -48,7 +48,7 @@ internal static class FunctionInvoker
             }
             else if (parameter.IsOptional && parameter.DefaultValue != null)
             {
-                argumentList.Add(parameter.DefaultValue);
+                deserializedArguments.Add(parameter.DefaultValue);
             }
             else
             {
@@ -56,9 +56,7 @@ internal static class FunctionInvoker
             }
         }
 
-        var argumentArray = argumentList.ToArray();
-        var invocationResult = function.DynamicInvoke(argumentArray);
-
+        var invocationResult = function.DynamicInvoke(deserializedArguments.ToArray());
         if (invocationResult is Task task)
         {
             await task.ConfigureAwait(false);
