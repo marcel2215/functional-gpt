@@ -11,6 +11,8 @@ public record Conversation
 
     public List<Message> Messages { get; set; } = new();
 
+    public List<Delegate> Functions { get; set; } = new();
+
     public void FromSystem(string message)
     {
         Messages.Add(Message.FromSystem(message));
@@ -39,5 +41,20 @@ public record Conversation
     public void FromFunction(string name, string message)
     {
         Messages.Add(Message.FromFunction(name, message));
+    }
+
+    public void AddFunction(Delegate function)
+    {
+        Functions.Add(function);
+    }
+
+    public bool RemoveFunction(Delegate function)
+    {
+        return Functions.Remove(function);
+    }
+
+    public void ClearFunctions()
+    {
+        Functions.Clear();
     }
 }

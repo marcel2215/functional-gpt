@@ -27,9 +27,21 @@ public class ChatGPT
     public async Task<string> CompleteAsync(Conversation conversation, CancellationToken cancellationToken = default)
     {
         var request = new CompletionRequest(Model, conversation.Messages);
-        if (Functions.Any())
+        var functions = new List<Delegate>();
+
+        if (Functions != null)
         {
-            request.Functions = FunctionSerializer.Serialize(Functions);
+            functions.AddRange(Functions);
+        }
+
+        if (conversation.Functions != null)
+        {
+            functions.AddRange(conversation.Functions);
+        }
+
+        if (functions.Any())
+        {
+            request.Functions = FunctionSerializer.Serialize(functions);
         }
 
         var response = await _httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", request, cancellationToken);
@@ -45,7 +57,7 @@ public class ChatGPT
             conversation.FromAssistant(message.FunctionCall);
 
             var simplifiedName = message.FunctionCall.Name.Replace("_", "");
-            var function = Functions.First(f => f.Method.Name.Equals(simplifiedName, StringComparison.InvariantCultureIgnoreCase));
+            var function = functions.First(f => f.Method.Name.Equals(simplifiedName, StringComparison.InvariantCultureIgnoreCase));
             var functionResult = await FunctionInvoker.InvokeAsync(function, message.FunctionCall.Arguments, cancellationToken);
 
             conversation.FromFunction(message.FunctionCall.Name, functionResult);
