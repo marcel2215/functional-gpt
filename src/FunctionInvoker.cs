@@ -60,7 +60,7 @@ internal static class FunctionInvoker
 
         if (invocationResult == null)
         {
-            return "{\"is_success\": true}";
+            return "{\"is_success\":true}";
         }
 
         return JsonSerializer.Serialize(invocationResult);
