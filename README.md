@@ -1,4 +1,4 @@
-# FunctionalGPT
+# FunctionalGPT (.NET 7.0+)
 Lightweight C#/.NET OpenAI API wrapper with support of GPT function calling via reflection.
 
 ## Usage
@@ -48,9 +48,6 @@ Console.WriteLine(response);
 ### Function Calling
 > [!WARNING]
 > Top-level and anonymous functions are currently not supported.
-
-> [!WARNING]
-> All parameters must be primitive types. Enums, arrays, and collections are allowed.
 
 ```cs
 using FunctionalGPT;
@@ -103,3 +100,79 @@ public static class SmartHome
     }
 }
 ```
+
+### Enums, Collections and Objects
+```cs
+using FunctionalGPT;
+
+var chatGPT = new ChatGPT("<OPENAI API KEY>", "gpt-3.5-turbo");
+
+chatGPT.AddFunction(Restaurant.GetAvailableTypes);
+chatGPT.AddFunction(Restaurant.CreateOrder);
+chatGPT.AddFunction(Restaurant.CancelOrder);
+
+var conversation = new Conversation("You work in a pizzeria, and your goal is to collect orders.");
+
+while (true)
+{
+    var userMessage = Console.ReadLine()!;
+    conversation.FromUser(userMessage);
+
+    var assistantResponse = await chatGPT.CompleteAsync(conversation);
+    Console.WriteLine(assistantResponse);
+}
+
+public enum PizzaSize
+{
+    Small,
+    Medium,
+    Large
+}
+
+public record Pizza(string Type, PizzaSize Size, int Quantity);
+
+public static class Restaurant
+{
+    private static readonly string[] _availableTypes =
+    {
+        "margherita",
+        "pepperoni",
+        "supreme",
+        "vegetarian",
+        "hawaiian"
+    };
+
+    public static string[] GetAvailableTypes()
+    {
+        return _availableTypes;
+    }
+
+    public static object CreateOrder(List<Pizza> pizzas)
+    {
+        // Validate the order:
+        foreach (var pizza in pizzas)
+        {
+            if (!_availableTypes.Contains(pizza.Type.ToLower()))
+            {
+                return "ERROR! We don't serve this type of pizza.";
+            }
+        }
+
+        // Perform some logic to save the order:
+        foreach (var pizza in pizzas)
+        {
+            Console.WriteLine($"{pizza.Quantity}x {pizza.Size} {pizza.Type}");
+        }
+
+        // You can return anything serializable by System.Text.Json:
+        return new { Success = true, OrderId = Random.Shared.Next() };
+    }
+
+    public static void CancelOrder(int id)
+    {
+        // Perform some logic to cancel the order:
+        Console.WriteLine($"Canceled order: {id}");
+    }
+}
+```
+
