@@ -172,7 +172,9 @@ public static class Restaurant
 
     public static void CancelOrder(int id)
     {
-        // Perform some logic to cancel the order:
+        // Perform some logic to cancel the order.
+        // WARNING: Make sure that the user can only cancel their own orders.
+
         Console.WriteLine($"Canceled order: {id}");
     }
 }
