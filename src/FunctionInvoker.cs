@@ -62,9 +62,7 @@ internal static class FunctionInvoker
                             }
                         };
 
-                        var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options)
-                            ?? throw new InvalidOperationException("Failed to deserialize the parameter.");
-
+                        var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options);
                         argumentList.Add(value);
                     }
                     catch
