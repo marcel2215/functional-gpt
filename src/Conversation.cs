@@ -53,6 +53,11 @@ public record Conversation
         return Functions.Remove(function);
     }
 
+    public void ClearMessages()
+    {
+        Messages.Clear();
+    }
+
     public void ClearFunctions()
     {
         Functions.Clear();
