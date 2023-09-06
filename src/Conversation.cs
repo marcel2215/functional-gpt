@@ -48,6 +48,17 @@ public record Conversation
         return Messages.Remove(message);
     }
 
+    public bool UnsendLast()
+    {
+        if (Messages.Any())
+        {
+            Messages.RemoveAt(Messages.Count - 1);
+            return true;
+        }
+
+        return false;
+    }
+
     public void AddFunction(Delegate function)
     {
         Functions.Add(function);
