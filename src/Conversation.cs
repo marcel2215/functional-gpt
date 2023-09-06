@@ -43,6 +43,11 @@ public record Conversation
         Messages.Add(Message.FromFunction(name, message));
     }
 
+    public bool Unsend(Message message)
+    {
+        return Messages.Remove(message);
+    }
+
     public void AddFunction(Delegate function)
     {
         Functions.Add(function);
