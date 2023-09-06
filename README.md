@@ -1,3 +1,5 @@
+![hero-image](https://github.com/marcel-kwiatkowski/functional-gpt/assets/124832798/f6259a90-c55e-499c-b17a-cf31b1bc9ff3)
+
 # FunctionalGPT (.NET 7.0+)
 Lightweight C#/.NET OpenAI API wrapper with support of GPT function calling via reflection.
 
