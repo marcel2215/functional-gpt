@@ -1,4 +1,4 @@
-﻿using FunctionalGPT.Properties;
+using FunctionalGPT.Properties;
 using System.Text.Json;
 
 namespace FunctionalGPT;
@@ -28,7 +28,7 @@ internal static class FunctionInvoker
             argumentDictionary.Add(simplifiedName, value);
         }
 
-        var argumentList = new List<object>();
+        var argumentList = new List<object?>();
         foreach (var parameter in function.Method.GetParameters())
         {
             if (parameter.ParameterType == typeof(CancellationToken))
