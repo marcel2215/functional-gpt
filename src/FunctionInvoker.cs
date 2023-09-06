@@ -5,7 +5,7 @@ namespace FunctionalGPT;
 
 internal static class FunctionInvoker
 {
-    internal static async Task<string> InvokeForResultAsync(Delegate function, string arguments, CancellationToken cancellationToken = default)
+    internal static async Task<string> InvokeAsync(Delegate function, string arguments, CancellationToken cancellationToken = default)
     {
         var argumentsDocument = JsonDocument.Parse(arguments);
         var argumentDictionary = new Dictionary<string, string>();

@@ -46,7 +46,7 @@ public class ChatGPT
 
             var simplifiedName = message.FunctionCall.Name.Replace("_", "");
             var function = Functions.First(f => f.Method.Name.Equals(simplifiedName, StringComparison.InvariantCultureIgnoreCase));
-            var functionResult = await FunctionInvoker.InvokeForResultAsync(function, message.FunctionCall.Arguments, cancellationToken);
+            var functionResult = await FunctionInvoker.InvokeAsync(function, message.FunctionCall.Arguments, cancellationToken);
 
             conversation.FromFunction(message.FunctionCall.Name, functionResult);
             return await CompleteAsync(conversation, cancellationToken);
