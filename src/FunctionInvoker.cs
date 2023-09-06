@@ -1,4 +1,4 @@
-using FunctionalGPT.Properties;
+﻿using FunctionalGPT.Properties;
 using System.Text.Json;
 
 namespace FunctionalGPT;
@@ -30,35 +30,23 @@ internal static class FunctionInvoker
             var simplifiedName = parameter.Name!.ToLowerInvariant();
             if (argumentDictionary.TryGetValue(simplifiedName, out var argument))
             {
-                if (parameter.ParameterType.IsEnum)
+                try
                 {
-                    if (!Enum.TryParse(parameter.ParameterType, argument.ToPascalCase(), out var value))
+                    var options = new JsonSerializerOptions
                     {
-                        return $"{{\"is_success\": false, \"error\": \"invalid enum value\", \"parameter\": \"{parameter.Name.ToPascalCase()}\"}}";
-                    }
-
-                    argumentList.Add(value);
-                }
-                else
-                {
-                    try
-                    {
-                        var options = new JsonSerializerOptions
-                        {
-                            PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
-                            Converters =
+                        PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
+                        Converters =
                             {
                                 new SnakeCaseEnumConverter()
                             }
-                        };
+                    };
 
-                        var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options);
-                        argumentList.Add(value);
-                    }
-                    catch
-                    {
-                        return $"{{\"is_success\":false,\"error\":\"Argument does not match parameter type.\",\"parameter\":\"{parameter.Name.ToPascalCase()}\",\"type\":\"{parameter.ParameterType}\"}}";
-                    }
+                    var value = JsonSerializer.Deserialize(argument, parameter.ParameterType, options);
+                    argumentList.Add(value);
+                }
+                catch
+                {
+                    return $"{{\"is_success\":false,\"error\":\"Argument does not match parameter type.\",\"parameter\":\"{parameter.Name.ToPascalCase()}\",\"type\":\"{parameter.ParameterType}\"}}";
                 }
             }
             else if (parameter.IsOptional && parameter.DefaultValue != null)
