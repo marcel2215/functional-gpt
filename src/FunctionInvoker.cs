@@ -1,4 +1,4 @@
-﻿using FunctionalGPT.Properties;
+using FunctionalGPT.Properties;
 using System.Text.Json;
 
 namespace FunctionalGPT;
@@ -14,16 +14,6 @@ internal static class FunctionInvoker
         {
             var simplifiedName = argument.Name.Replace("_", "").ToLowerInvariant();
             var value = argument.Value.GetRawText();
-
-            if (value.StartsWith("\""))
-            {
-                value = value[1..];
-            }
-
-            if (value.EndsWith("\""))
-            {
-                value = value[..^1];
-            }
 
             argumentDictionary.Add(simplifiedName, value);
         }
