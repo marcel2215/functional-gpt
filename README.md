@@ -3,6 +3,8 @@
 # FunctionalGPT (.NET 7.0+)
 Lightweight C#/.NET OpenAI API wrapper with support of GPT function calling via reflection.
 
+![example-screenshot](https://github.com/marcel-kwiatkowski/functional-gpt/assets/124832798/468d337f-34a9-407f-865e-ecf497252fd0)
+
 ## Usage
 ### Simple Prompt
 ``` cs
