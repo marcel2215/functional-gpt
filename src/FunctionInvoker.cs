@@ -8,27 +8,17 @@ internal static class FunctionInvoker
     internal static async Task<string> InvokeAsync(Delegate function, string arguments, CancellationToken cancellationToken = default)
     {
         var modelArguments = JsonDocument.Parse(arguments);
-        var rawArguments = new Dictionary<string, string>();
+        var parsedArguments = new List<object?>();
 
-        foreach (var rawArgument in modelArguments.RootElement.EnumerateObject())
-        {
-            var simplifiedArgumentName = rawArgument.Name.Replace("_", "").ToLowerInvariant();
-            var rawArgumentValue = rawArgument.Value.GetRawText();
-
-            rawArguments.Add(simplifiedArgumentName, rawArgumentValue);
-        }
-
-        var deserializedArguments = new List<object?>();
         foreach (var parameter in function.Method.GetParameters())
         {
             if (parameter.ParameterType == typeof(CancellationToken))
             {
-                deserializedArguments.Add(cancellationToken);
+                parsedArguments.Add(cancellationToken);
                 continue;
             }
 
-            var simplifiedParameterName = parameter.Name!.ToLowerInvariant();
-            if (rawArguments.TryGetValue(simplifiedParameterName, out var rawArgumentValue))
+            if (modelArguments.RootElement.TryGetProperty(parameter.Name!.ToSnakeCase(), out var argument))
             {
                 try
                 {
@@ -38,25 +28,25 @@ internal static class FunctionInvoker
                         Converters = { new SnakeCaseEnumConverter() }
                     };
 
-                    var argumentValue = JsonSerializer.Deserialize(rawArgumentValue, parameter.ParameterType, jsonOptions);
-                    deserializedArguments.Add(argumentValue);
+                    var argumentValue = JsonSerializer.Deserialize(argument.GetRawText(), parameter.ParameterType, jsonOptions);
+                    parsedArguments.Add(argumentValue);
                 }
                 catch
                 {
-                    return $"{{\"is_success\":false,\"error\":\"Argument does not match parameter type.\",\"parameter\":\"{parameter.Name.ToPascalCase()}\",\"type\":\"{parameter.ParameterType}\"}}";
+                    return $"{{\"is_success\":false,\"error\":\"Argument does not match parameter type.\",\"parameter\":\"{parameter.Name!.ToPascalCase()}\",\"type\":\"{parameter.ParameterType}\"}}";
                 }
             }
             else if (parameter.IsOptional && parameter.DefaultValue != null)
             {
-                deserializedArguments.Add(parameter.DefaultValue);
+                parsedArguments.Add(parameter.DefaultValue);
             }
             else
             {
-                return $"{{\"is_success\":false,\"error\":\"Value is missing for required parameter.\",\"parameter\":\"{parameter.Name.ToSnakeCase()}\"}}";
+                return $"{{\"is_success\":false,\"error\":\"Value is missing for required parameter.\",\"parameter\":\"{parameter.Name!.ToSnakeCase()}\"}}";
             }
         }
 
-        var invocationResult = function.DynamicInvoke(deserializedArguments.ToArray());
+        var invocationResult = function.DynamicInvoke(parsedArguments.ToArray());
         if (invocationResult is Task task)
         {
             await task.ConfigureAwait(false);
