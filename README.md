@@ -4,6 +4,8 @@
 
 # FunctionalGPT (.NET 7.0+)
 Lightweight C#/.NET OpenAI API wrapper with support of GPT function calling via reflection.
+> [!CAUTION]
+> This project is now deprecated and being replaced by [GenerativeCS](https://github.com/chataize/generative-cs).
 
 ## Usage
 ### Simple Prompt
