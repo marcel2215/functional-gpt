@@ -1,11 +1,15 @@
+> [!CAUTION]
+> This project is now deprecated and being replaced by [GenerativeCS](https://github.com/chataize/generative-cs).
+
+<br><br><br>
+
 ![hero-image](https://github.com/marcel-kwiatkowski/functional-gpt/assets/124832798/f6259a90-c55e-499c-b17a-cf31b1bc9ff3)
 ---
 ![example-screenshot](https://github.com/marcel-kwiatkowski/functional-gpt/assets/124832798/685fedc3-9dfd-4cbe-9375-5342564d4029)
 
 # FunctionalGPT (.NET 7.0+)
 Lightweight C#/.NET OpenAI API wrapper with support of GPT function calling via reflection.
-> [!CAUTION]
-> This project is now deprecated and being replaced by [GenerativeCS](https://github.com/chataize/generative-cs).
+
 
 ## Usage
 ### Simple Prompt
